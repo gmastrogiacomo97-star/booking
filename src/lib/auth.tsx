@@ -24,18 +24,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!mounted) return
             setSession(session)
             setUser(session?.user ?? null)
-
             if (session?.user) {
                 supabase.from('profiles').select('role').eq('id', session.user.id).single()
                     .then(({ data }) => {
                         if (mounted) {
                             setRole(data?.role || 'user')
-                            setLoading(false)
-                        }
-                    })
-                    .catch(() => {
-                        if (mounted) {
-                            setRole('user')
                             setLoading(false)
                         }
                     })
@@ -45,26 +38,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setLoading(false)
                 }
             }
-        }).catch(() => {
-            if (mounted) setLoading(false)
         })
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'INITIAL_SESSION') return
-
             if (mounted) {
                 setSession(session)
                 setUser(session?.user ?? null)
             }
-
             if (session?.user) {
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                     supabase.from('profiles').select('role').eq('id', session.user.id).single()
                         .then(({ data }) => {
                             if (mounted) setRole(data?.role || 'user')
-                        })
-                        .catch(() => {
-                            if (mounted) setRole('user')
                         })
                 }
             } else {
