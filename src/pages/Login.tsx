@@ -13,13 +13,17 @@ export default function Login() {
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
     const [authError, setAuthError] = useState<string | null>(null)
     const navigate = useNavigate()
-    const { user } = useAuth()
+    const { user, role, loading } = useAuth()
 
     useEffect(() => {
-        if (user) {
-            navigate('/dashboard')
+        if (!loading && user) {
+            if (role === 'admin') {
+                navigate('/admin')
+            } else {
+                navigate('/dashboard')
+            }
         }
-    }, [user, navigate])
+    }, [user, role, loading, navigate])
 
     const onSubmit = async (data: any) => {
         setAuthError(null)
@@ -27,11 +31,9 @@ export default function Login() {
             email: data.email,
             password: data.password,
         })
-
         if (error) {
             setAuthError(error.message)
         }
-        // La redirezione avviene in automatico dal useEffect quando il context dell'user si aggiorna.
     }
 
     return (
@@ -44,7 +46,6 @@ export default function Login() {
                     <h1 className="text-2xl font-bold tracking-tight text-white">Bentornato</h1>
                     <p className="text-slate-400">Accedi per gestire le tue prenotazioni</p>
                 </div>
-
                 <Card>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <CardHeader>
@@ -54,22 +55,14 @@ export default function Login() {
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="mario@esempio.com"
-                                    {...register("email", { required: "L'email è obbligatoria" })}
-                                />
+                                <Input id="email" type="email" placeholder="mario@esempio.com"
+                                    {...register("email", { required: "L'email è obbligatoria" })} />
                                 {errors.email && <p className="text-sm text-red-500">{errors.email.message as string}</p>}
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    placeholder="••••••••"
-                                    {...register("password", { required: "La password è obbligatoria" })}
-                                />
+                                <Input id="password" type="password" placeholder="••••••••"
+                                    {...register("password", { required: "La password è obbligatoria" })} />
                                 {errors.password && <p className="text-sm text-red-500">{errors.password.message as string}</p>}
                             </div>
                         </CardContent>
